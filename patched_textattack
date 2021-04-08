@@ -5,6 +5,7 @@ import re
 import sys
 
 sys.path.append('libs/TextAttack')
+sys.path.append('libs/xu_auto_LiRPA')
 
 import patched
 from unittest.mock import patch

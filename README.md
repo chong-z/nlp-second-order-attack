@@ -6,7 +6,7 @@ _Chong Zhang, Jieyu Zhao, Huan Zhang, Kai-Wei Chang, and Cho-Jui Hsieh_, "Double
 
 <img src="https://raw.githubusercontent.com/chong-z/nlp-second-order-attack/main/img/paper-image-large.jpg" alt="Thumbnail of the paper" width="500px">
 
-## Attack Setup
+## Setup
 
 Verified Environment:
 - Ubuntu 20.04
@@ -30,7 +30,11 @@ Run the setup for PyTorch 1.7 and RTX 30xx GPU.
 ./setup.sh
 ```
 
-Train a certified classifier through Jia et al. (2019):
+## Run Attacks
+
+### Certified BoW, CNN, and LSTM (Jia et al., 2019)
+
+Train a certified CNN model:
 ```
 python libs/jia_certified/src/train.py classification cnn \
   --out-dir model_data/cnn_cert_test -T 60 \
@@ -39,16 +43,88 @@ python libs/jia_certified/src/train.py classification cnn \
   --data-cache-dir .cache --save-best-only
 ```
 
-Attack 10 examples from the SST2 dataset. Note that `cnn_cert_test` is a pre-defined variable in `models/jia_certified.py`.
+Attack 10 examples from the SST2 dataset. Note that `cnn_cert_test` is a pre-defined variable in `models/jia_certified.py`, and you need to modify the file if you are using a different `--out-dir`.
 ```
 ./patched_textattack attack --attack-from-file=biasattack.py:SOBeamAttack \
-  --model-from-file=models/jia_certified.py:cnn_cert_test \
-  --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False
+  --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False \
+  --model=models/jia_certified.py:cnn_cert_test
 ```
 
-## Setup for Xu et al. (2020):
+### Certified Transformers (Xu et al. 2020)
 
-May require torch==1.6. Will add detailed steps later.
+Train a certified 3-layer Transformers:
+```
+export PYTHONPATH=$PYTHONPATH:libs/xu_auto_LiRPA
+
+python libs/xu_auto_LiRPA/examples/language/train.py \
+  --dir=model_data/transformer_cert --robust \
+  --method=IBP+backward_train --train --max_sent_length 128 \
+  --num_layers 3
+```
+
+Attack 10 examples from the SST2 dataset.
+```
+./patched_textattack attack --attack-from-file=biasattack.py:SOBeamAttack \
+  --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False \
+  --model=models/xu_auto_LiRPA.py:transformer_cert
+```
+
+### Custom models
+
+Our code is general and can be used to evaluate custom models. Similar to `models/jia_certified.py`, you will need to create a wrapper `models/custom_model.py` and implement two classes:
+1. `class CustomTokenizer`
+    - `def encode():`
+    - Optional: `def batch_encode():`
+2. `class ModelWrapper`
+    - `def __call__():`
+    - `def to():`
+
+And then the model and tokenizer can be specified with `--model=models/custom_model.py:model_obj:tokenizer_obj`, where `model_obj` and `tokenizer_obj` are the variables of the corresponding type.
+
+### Other models from TextAttack
+
+Our code is built upon [Qdata/TextAttack](https://github.com/QData/TextAttack) and thus shares the similar API.
+
+Attack a pre-trained model `lstm-sst2` in [TextAttack Model Zoo](https://github.com/chong-z/TextAttack/blob/d6ebeeb1afae215d7de5f04c3aac743bbeaf54db/textattack/models/README.md):
+```
+./patched_textattack attack --attack-from-file=biasattack.py:SOBeamAttack \
+  --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False \
+  --model=lstm-sst2
+```
+
+Train a `bert-base-uncased` with the `textattack train` command:
+```
+./patched_textattack train --model=bert-base-uncased --from-pretrained=True \
+  --batch-size=32 --epochs=5 --learning-rate=2e-5 --seed=168 \
+  --dataset=glue:sst2 --max-length=128 --save-last
+```
+
+The resulting model can be found under `model_data/sweeps/bert-base-uncased_pretrained_glue:sst2_no-aug_2021-04-08-14-00-49-733736`. To attack:
+```
+./patched_textattack attack --attack-from-file=biasattack.py:SOBeamAttack \
+  --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False \
+  --model=model_data/sweeps/bert-base-uncased_pretrained_glue:sst2_no-aug_2021-04-08-14-00-49-733736
+```
+
+## Attack Parameters
+
+- `attack-from-file`: See `biasattack.py` for a list of algorithms.
+    - `SOEnumAttack`: The brute-force SO-Enum attack that enumerates all neighborhood within distance `k=2`.
+    - `SOBeamAttack`: The beam search based SO-Beam attack that searches within the neighborhood of distance `k=6`.
+    - `RandomBaselineAttack`: The random baseline method mentioned in Appendix.
+    - `BiasAnalysisChecklist`: The enumeration method used for evaluating the counterfactual bias on protected tokens from Ribeiro et al. (2020).
+    - `BiasAnalysisGender`: The enumeration method used for evaluating the counterfactual bias on gendered pronounces from Zhao et al. (2018a).
+- `dataset-from-nlp`: The name of the HuggingFace dataset. It's also possible to load a custom dataset with `--dataset-from-file=datasets.py:sst2_simple`.
+- `model`: The target model for the attack. Can be a custom model in the form of `model_wrapper.py:model_obj:tokenizer_obj`, or the name/path of the TextAttack model.
+- Additional parameters: Pleaser refer to `./patched_textattack --help` and `./patched_textattack attack --help`.
+
+## Collect Metrics with `wandb`
+
+We use `wandb` to collect metrics for both training and attacking. To enable `wandb`, please do the following:
+1. Sign up for a free account through `wandb login`, or go to the [sign up page](https://app.wandb.ai/login?signup=true).
+2. Append `--enable-wandb` to the training and attacking commands mentioned previously.
+
+Please refer to https://docs.wandb.ai/quickstart for detailed guides.
 
 ## Credits
 1. `TextAttack`: https://github.com/QData/TextAttack.
