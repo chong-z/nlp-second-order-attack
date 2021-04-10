@@ -1,9 +1,9 @@
 [submodule "libs/TextAttack"]
 	path = libs/TextAttack
-	url = git@github.com:chong-z/TextAttack.git
+	url = https://github.com/chong-z/TextAttack.git
 [submodule "libs/jia_certified"]
 	path = libs/jia_certified
-	url = git@github.com:chong-z/certified-word-sub.git
+	url = https://github.com/chong-z/certified-word-sub.git
 [submodule "libs/xu_auto_LiRPA"]
 	path = libs/xu_auto_LiRPA
-	url = git@github.com:KaidiXu/auto_LiRPA.git
+	url = https://github.com/KaidiXu/auto_LiRPA.git

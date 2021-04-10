@@ -14,7 +14,6 @@ pip install -r requirements.txt
 pip install --no-deps --ignore-requires-python lm-scorer==0.4.2
 
 # Setup Jia et al. (2019).
-wget https://raw.githubusercontent.com/robinjia/certified-word-sub/master/data/counterfitted_neighbors.json -O data/counterfitted_neighbors.json
 cd libs/jia_certified
 ./download_deps.sh
 cd ../..
