@@ -2,7 +2,7 @@
 
 Robustness and counterfactual bias are usually evaluated on a test dataset. However, are these evaluations robust? In other words, if a model is robust or unbiased on a test set, will the properties still hold under a slightly perturbed test set? In this paper, we propose a "double perturbation" framework to uncover model weaknesses beyond the test dataset. The framework first perturbs the test dataset to construct abundant natural sentences similar to the test data, and then diagnoses the prediction change regarding a single-word substitution. We apply this framework to study two perturbation-based approaches that are used to analyze models' robustness and counterfactual bias. In the experiments, our method attains high success rates (96.0%-99.8%) in finding vulnerable examples and is able to reveal the hidden model bias. More details can be found in our paper:
 
-_Chong Zhang, Jieyu Zhao, Huan Zhang, Kai-Wei Chang, and Cho-Jui Hsieh_, "Double Perturbation: On the Robustness of Robustness and Counterfactual Bias Evaluation", NAACL 2021
+_Chong Zhang, Jieyu Zhao, Huan Zhang, Kai-Wei Chang, and Cho-Jui Hsieh_, "Double Perturbation: On the Robustness of Robustness and Counterfactual Bias Evaluation", NAACL 2021 [[demo notebook]](https://colab.research.google.com/github/chong-z/nlp-second-order-attack/blob/main/nlp_second_order_attack_demo.ipynb)
 
 <img src="https://raw.githubusercontent.com/chong-z/nlp-second-order-attack/main/img/paper-image-large.jpg" alt="Thumbnail of the paper" width="500px">
 
