@@ -92,18 +92,18 @@ Attack a pre-trained model `lstm-sst2` in [TextAttack Model Zoo](https://github.
   --model=lstm-sst2
 ```
 
-Train a `bert-base-uncased` with the `textattack train` command:
+Train a LSTM with the `textattack train` command:
 ```
-./patched_textattack train --model=bert-base-uncased --from-pretrained=True \
-  --batch-size=32 --epochs=5 --learning-rate=2e-5 --seed=168 \
+./patched_textattack train --model=lstm \
+  --batch-size=32 --epochs=15 --learning-rate=1e-4 --seed=42 \
   --dataset=glue:sst2 --max-length=128 --save-last
 ```
 
-The resulting model can be found under `model_data/sweeps/bert-base-uncased_pretrained_glue:sst2_no-aug_2021-04-08-14-00-49-733736`. To attack:
+The resulting model can be found under `model_data/sweeps/lstm_pretrained_glue:sst2_None_2021-04-10-17-23-38-819530`. To attack:
 ```
 ./patched_textattack attack --attack-from-file=biasattack.py:SOBeamAttack \
   --dataset-from-nlp=glue:sst2:validation --num-examples=10 --shuffle=False \
-  --model=model_data/sweeps/bert-base-uncased_pretrained_glue:sst2_no-aug_2021-04-08-14-00-49-733736
+  --model=model_data/sweeps/lstm_pretrained_glue:sst2_None_2021-04-10-17-23-38-819530
 ```
 
 ## Attack Parameters
@@ -114,7 +114,7 @@ The resulting model can be found under `model_data/sweeps/bert-base-uncased_pret
     - `RandomBaselineAttack`: The random baseline method mentioned in Appendix.
     - `BiasAnalysisChecklist`: The enumeration method used for evaluating the counterfactual bias on protected tokens from Ribeiro et al. (2020).
     - `BiasAnalysisGender`: The enumeration method used for evaluating the counterfactual bias on gendered pronounces from Zhao et al. (2018a).
-- `dataset-from-nlp`: The name of the HuggingFace dataset. It's also possible to load a custom dataset with `--dataset-from-file=datasets.py:sst2_simple`.
+- `dataset-from-nlp`: The name of the HuggingFace dataset. It's also possible to load a custom dataset with `--dataset-from-file=custom_datasets.py:sst2_simple`.
 - `model`: The target model for the attack. Can be a custom model in the form of `model_wrapper.py:model_obj:tokenizer_obj`, or the name/path of the TextAttack model.
 - Additional parameters: Pleaser refer to `./patched_textattack --help` and `./patched_textattack attack --help`.
 
